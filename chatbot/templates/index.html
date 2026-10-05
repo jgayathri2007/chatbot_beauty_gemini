@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ chatbot_title }}</title>
+    <style>
+        :root {
+            --pink: #e85aad;
+            --purple: #7c5cff;
+            --ink: #2d2034;
+            --muted: #776b80;
+            --glass: rgba(255,255,255,.76);
+            --border: rgba(255,255,255,.72);
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+            color: var(--ink);
+            background:
+                radial-gradient(circle at 10% 10%, #ffd8ed 0, transparent 28%),
+                radial-gradient(circle at 90% 15%, #ddd6ff 0, transparent 30%),
+                linear-gradient(135deg, #fff8fc, #f5f1ff);
+            overflow-x: hidden;
+        }
+
+        .app {
+            width: min(1120px, 94%);
+            margin: 0 auto;
+            padding: 28px 0;
+        }
+
+        .hero {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 18px;
+            margin-bottom: 18px;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 13px;
+        }
+
+        .logo {
+            width: 54px;
+            height: 54px;
+            display: grid;
+            place-items: center;
+            border-radius: 18px;
+            background: linear-gradient(135deg, var(--pink), var(--purple));
+            color: white;
+            font-size: 25px;
+            box-shadow: 0 12px 28px rgba(124,92,255,.2);
+        }
+
+        h1 { margin: 0; font-size: clamp(25px, 4vw, 38px); }
+        .tagline { margin: 4px 0 0; color: var(--muted); }
+
+        .badge {
+            padding: 9px 13px;
+            border-radius: 999px;
+            background: rgba(255,255,255,.7);
+            border: 1px solid var(--border);
+            font-size: 13px;
+            color: #5b4e63;
+            white-space: nowrap;
+        }
+
+        .shell {
+            display: grid;
+            grid-template-columns: 270px 1fr;
+            min-height: 650px;
+            border: 1px solid var(--border);
+            border-radius: 28px;
+            overflow: hidden;
+            background: var(--glass);
+            backdrop-filter: blur(22px);
+            box-shadow: 0 25px 70px rgba(72, 45, 94, .13);
+        }
+
+        aside {
+            padding: 22px;
+            background: rgba(255,255,255,.48);
+            border-right: 1px solid rgba(150,120,170,.12);
+        }
+
+        aside h2 {
+            font-size: 14px;
+            margin: 0 0 14px;
+            letter-spacing: .08em;
+            text-transform: uppercase;
+            color: #6c5a74;
+        }
+
+        .quick {
+            display: flex;
+            flex-direction: column;
+            gap: 9px;
+        }
+
+        .quick button {
+            border: 1px solid rgba(150,120,170,.14);
+            background: rgba(255,255,255,.74);
+            color: #4a3b52;
+            padding: 12px 13px;
+            border-radius: 14px;
+            text-align: left;
+            cursor: pointer;
+            transition: .2s ease;
+            font-size: 13px;
+        }
+
+        .quick button:hover {
+            transform: translateY(-2px);
+            border-color: rgba(232,90,173,.35);
+            box-shadow: 0 9px 20px rgba(100,70,120,.08);
+        }
+
+        .scope {
+            margin-top: 22px;
+            padding: 15px;
+            border-radius: 17px;
+            background: linear-gradient(135deg, rgba(255,224,242,.72), rgba(227,220,255,.68));
+            font-size: 12px;
+            line-height: 1.6;
+            color: #5e5266;
+        }
+
+        .chat {
+            display: flex;
+            flex-direction: column;
+            min-width: 0;
+        }
+
+        .messages {
+            flex: 1;
+            padding: 26px;
+            overflow-y: auto;
+            min-height: 470px;
+            max-height: 590px;
+        }
+
+        .welcome {
+            max-width: 700px;
+            margin: 35px auto;
+            text-align: center;
+        }
+
+        .welcome-icon {
+            font-size: 44px;
+            margin-bottom: 10px;
+        }
+
+        .welcome h2 { margin: 0 0 8px; }
+        .welcome p { color: var(--muted); line-height: 1.6; }
+
+        .message {
+            display: flex;
+            gap: 11px;
+            margin: 15px 0;
+            animation: rise .25s ease;
+        }
+
+        .message.user { justify-content: flex-end; }
+        .avatar {
+            flex: 0 0 36px;
+            width: 36px;
+            height: 36px;
+            border-radius: 13px;
+            display: grid;
+            place-items: center;
+            background: white;
+            box-shadow: 0 7px 18px rgba(60,40,80,.08);
+        }
+
+        .bubble {
+            max-width: min(75%, 650px);
+            padding: 13px 15px;
+            border-radius: 18px;
+            line-height: 1.55;
+            font-size: 14px;
+            white-space: pre-wrap;
+        }
+
+        .assistant .bubble {
+            background: white;
+            border: 1px solid rgba(150,120,170,.12);
+            border-top-left-radius: 6px;
+        }
+
+        .user .bubble {
+            color: white;
+            background: linear-gradient(135deg, var(--pink), var(--purple));
+            border-top-right-radius: 6px;
+        }
+
+        .composer {
+            padding: 16px 20px 20px;
+            border-top: 1px solid rgba(150,120,170,.12);
+            background: rgba(255,255,255,.48);
+        }
+
+        form {
+            display: flex;
+            gap: 9px;
+            padding: 7px;
+            background: white;
+            border: 1px solid rgba(150,120,170,.14);
+            border-radius: 18px;
+            box-shadow: 0 8px 25px rgba(70,50,90,.06);
+        }
+
+        input {
+            flex: 1;
+            min-width: 0;
+            border: 0;
+            outline: 0;
+            padding: 12px 13px;
+            font-size: 14px;
+            color: var(--ink);
+            background: transparent;
+        }
+
+        .send {
+            border: 0;
+            padding: 0 20px;
+            border-radius: 14px;
+            color: white;
+            background: linear-gradient(135deg, var(--pink), var(--purple));
+            cursor: pointer;
+            font-weight: 700;
+        }
+
+        .send:disabled { opacity: .55; cursor: wait; }
+
+        .note {
+            text-align: center;
+            margin: 8px 0 0;
+            color: #8a7d91;
+            font-size: 11px;
+        }
+
+        @keyframes rise {
+            from { opacity: 0; transform: translateY(7px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @media (max-width: 820px) {
+            .shell { grid-template-columns: 1fr; }
+            aside { border-right: 0; border-bottom: 1px solid rgba(150,120,170,.12); }
+            .quick { display: grid; grid-template-columns: 1fr 1fr; }
+            .messages { max-height: none; }
+            .hero { align-items: flex-start; }
+            .badge { display: none; }
+        }
+
+        @media (max-width: 500px) {
+            .app { width: 96%; padding-top: 14px; }
+            .quick { grid-template-columns: 1fr; }
+            .bubble { max-width: 86%; }
+            .messages { padding: 18px 14px; }
+        }
+    </style>
+</head>
+<body>
+<div class="app">
+    <header class="hero">
+        <div class="brand">
+            <div class="logo">✦</div>
+            <div>
+                <h1>{{ chatbot_title }}</h1>
+                <p class="tagline">Your focused AI beauty & personal-care assistant</p>
+            </div>
+        </div>
+        <div class="badge">● Gemini AI</div>
+    </header>
+
+    <section class="shell">
+        <aside>
+            <h2>Quick questions</h2>
+            <div class="quick">
+                {% for question in quick_questions %}
+                <button type="button" data-question="{{ question }}">{{ question }}</button>
+                {% endfor %}
+            </div>
+            <div class="scope">
+                <strong>Glowora scope</strong><br>
+                Skincare • Products • Ingredients • Sunscreen • Hair • Lip • Nail • Body care
+            </div>
+        </aside>
+
+        <main class="chat">
+            <div class="messages" id="messages">
+                <div class="welcome" id="welcome">
+                    <div class="welcome-icon">🌸</div>
+                    <h2>Welcome to Glowora AI</h2>
+                    <p>
+                        Ask me about skincare, products, ingredients, sunscreen,
+                        hair-care, lip-care, nail-care, body-care, or a simple beauty routine.
+                    </p>
+                </div>
+            </div>
+
+            <div class="composer">
+                <form id="chat-form">
+                    <input id="message-input" autocomplete="off"
+                           placeholder="Ask a beauty or skincare question..." />
+                    <button class="send" id="send-button" type="submit">Send ✨</button>
+                </form>
+                <div class="note">Glowora AI answers beauty and personal-care topics only.</div>
+            </div>
+        </main>
+    </section>
+</div>
+
+<script>
+    const messages = document.getElementById("messages");
+    const form = document.getElementById("chat-form");
+    const input = document.getElementById("message-input");
+    const sendButton = document.getElementById("send-button");
+    const welcome = document.getElementById("welcome");
+
+    function addMessage(text, role) {
+        if (welcome) welcome.remove();
+
+        const wrapper = document.createElement("div");
+        wrapper.className = `message ${role}`;
+
+        const avatar = document.createElement("div");
+        avatar.className = "avatar";
+        avatar.textContent = role === "user" ? "👤" : "✦";
+
+        const bubble = document.createElement("div");
+        bubble.className = "bubble";
+        bubble.textContent = text;
+
+        if (role === "user") {
+            wrapper.appendChild(bubble);
+            wrapper.appendChild(avatar);
+        } else {
+            wrapper.appendChild(avatar);
+            wrapper.appendChild(bubble);
+        }
+
+        messages.appendChild(wrapper);
+        messages.scrollTop = messages.scrollHeight;
+    }
+
+    async function sendMessage(text) {
+        const message = text.trim();
+        if (!message) return;
+
+        addMessage(message, "user");
+        input.value = "";
+        sendButton.disabled = true;
+
+        try {
+            const response = await fetch("/chat", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ message })
+            });
+
+            const data = await response.json();
+            addMessage(data.reply || "Sorry, I couldn't generate a response.", "assistant");
+        } catch (error) {
+            addMessage("Sorry, I couldn't reach the chatbot server right now.", "assistant");
+        } finally {
+            sendButton.disabled = false;
+            input.focus();
+        }
+    }
+
+    form.addEventListener("submit", (event) => {
+        event.preventDefault();
+        sendMessage(input.value);
+    });
+
+    document.querySelectorAll("[data-question]").forEach(button => {
+        button.addEventListener("click", () => sendMessage(button.dataset.question));
+    });
+</script>
+</body>
+</html>
